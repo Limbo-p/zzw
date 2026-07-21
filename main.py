@@ -8,8 +8,13 @@ Usage:
 import sys
 from pathlib import Path
 
-# Add src/ to Python path so cjscript package can be imported
-_src = Path(__file__).resolve().parent / "src"
+# Add src/ to Python path so cjscript package can be imported.
+# When running under Crawlab, main.py is copied to a task subdirectory,
+# so we also check the parent directory (the spider workspace root).
+_here = Path(__file__).resolve().parent
+_src = _here / "src"
+if not _src.is_dir():
+    _src = _here.parent / "src"
 if str(_src) not in sys.path:
     sys.path.insert(0, str(_src))
 
