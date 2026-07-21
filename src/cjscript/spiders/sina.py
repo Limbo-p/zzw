@@ -95,7 +95,8 @@ def fetch_detail(session, url):
         for sel in ["#artibody p", ".article-content p", ".main-content.w1240 p"]:
             paragraphs = tree.cssselect(sel)
             if paragraphs:
-                content = "\n".join(p.text_content().strip() for p in paragraphs if p.text_content().strip())
+                content = "
+".join(p.text_content().strip() for p in paragraphs if p.text_content().strip())
                 if len(content) > 100:
                     break
 
@@ -150,7 +151,10 @@ def run(max_articles=10, output_dir=None):
         logger.info("[{}/{}] {}", i + 1, min(max_articles, len(urls)), item["url"][:60])
         detail = fetch_detail(session, item["url"])
         if detail:
-            detail["keywords"] = item.get("keywords", "").split("\uFF0C") if item.get("keywords") else []\n            detail["summary"] = item.get("intro", "")\n            detail["ctime"] = item.get("ctime", 0)\n            results.append(detail)
+            detail["keywords"] = item.get("keywords", "").split("\uFF0C") if item.get("keywords") else []
+            detail["summary"] = item.get("intro", "")
+            detail["ctime"] = item.get("ctime", 0)
+            results.append(detail)
 
     out_dir = output_dir or (settings.output_dir / "sina_7x24")
     os.makedirs(out_dir, exist_ok=True)
@@ -158,13 +162,21 @@ def run(max_articles=10, output_dir=None):
     out_path = out_dir / f"sina_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
     with open(out_path, "w", encoding="utf-8") as f:
         for i, art in enumerate(results, 1):
-            f.write(f"{'='*60}\n")
-            f.write(f"[{i}] {art.get('title', '')}\n")
-            f.write(f"source: {art.get('source', '')}\n")
-            f.write(f"time: {art.get('pub_time', '')}\n")
-            f.write(f"url: {art.get('url', '')}\n")
-            f.write(f"{'-'*60}\n")
-            f.write(f"{art.get('content', '')}\n\n")
+            f.write(f"{'='*60}
+")
+            f.write(f"[{i}] {art.get('title', '')}
+")
+            f.write(f"source: {art.get('source', '')}
+")
+            f.write(f"time: {art.get('pub_time', '')}
+")
+            f.write(f"url: {art.get('url', '')}
+")
+            f.write(f"{'-'*60}
+")
+            f.write(f"{art.get('content', '')}
+
+")
 
     save_to_mongodb(results)
 
@@ -175,6 +187,7 @@ def run(max_articles=10, output_dir=None):
 
 if __name__ == "__main__":
     run()
+
 
 
 
