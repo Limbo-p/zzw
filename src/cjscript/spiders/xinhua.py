@@ -314,6 +314,12 @@ def save_to_mongodb(results: list[dict], collection: str = "output/xinhua/") -> 
         client = MongoClient("172.19.0.2", 27017, serverSelectionTimeoutMS=3000)
         db = client["crawlab_test"]
         col = db[collection]
+        task_id = os.environ.get("CRAWLAB_TASK_ID") or os.getcwd().split("/")[-1] if os.getcwd().split("/")[-1].startswith("6a") else None
+        if task_id:
+            docs = [dict(r, task_id=task_id) for r in results]
+            col.insert_many(docs)
+        else:
+            col.insert_many(results)
         logger.info("MongoDB: {} results saved to crawlab_test.{}", len(results), collection)
     except Exception as e:
         logger.warning("MongoDB save failed (file output unaffected): {}", e)
