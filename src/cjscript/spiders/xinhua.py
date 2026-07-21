@@ -316,7 +316,8 @@ def save_to_mongodb(results: list[dict], collection: str = "output/xinhua/") -> 
         col = db[collection]
         task_id = os.environ.get("CRAWLAB_TASK_ID") or (Path(__import__("sys").argv[0]).resolve().parent.name if len(__import__("sys").argv) > 0 else None)
         if task_id:
-            docs = [dict(r, task_id=task_id) for r in results]
+            from bson.objectid import ObjectId
+            docs = [dict(r, task_id=ObjectId(task_id)) for r in results]
             col.insert_many(docs)
         else:
             col.insert_many(results)
@@ -414,6 +415,7 @@ if __name__ == "__main__":
         days_back=settings.cs_days_back,
         headless=settings.cs_headless,
     )
+
 
 
 
