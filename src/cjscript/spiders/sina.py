@@ -46,26 +46,31 @@ def url_fingerprint(url):
     return hashlib.md5(url.strip().lower().encode()).hexdigest()
 
 
-def fetch_article_urls(session):
-    """抓取新浪财经首页，提取新闻文章链接"""
-    logger.info("抓取首页: https://finance.sina.com.cn/")
-    resp = session.get("https://finance.sina.com.cn/", timeout=30)
-    resp.encoding = "utf-8"
-    tree = html.fromstring(resp.text)
+def fetch_article_urls(session, max_pages=3):
+    """?7x24 API????URL??"""
+    logger.info("??7x24????")
 
-    # 提取文章链接
-    urls = set()
-    for a in tree.cssselect("a[href*='finance.sina.com.cn']"):
-        href = a.get("href", "").strip()
-        title = a.get("title", "").strip() or a.text_content().strip()
-        if href and title and len(title) > 8 and href.endswith(".html"):
-            urls.add(href.split("?")[0])
-    logger.info("提取到 {} 条文章链接", len(urls))
-    return list(urls)
+    api = "https://feed.mix.sina.com.cn/api/roll/get?pageid=153&lid=2509&k=&num=15&page={}"
+    urls = []
+    for pg in range(1, max_pages + 1):
+        try:
+            r = session.get(api.format(pg), timeout=10)
+            data = r.json()
+            items = data["result"]["data"]
+            for item in items:
+                url = item.get("url", "").rstrip(".")
+                if url and "finance.sina.com.cn" in url:
+                    urls.append(url)
+            if len(items) < 15:
+                break
+        except Exception as e:
+            logger.warning("API request failed page {}: {}", pg, e)
+            break
+    logger.info("??? {} ?7x24??", len(urls))
+    return urls
 
 
 def fetch_detail(session, url):
-    """抓取文章详情页"""
     try:
         polite_delay()
         resp = session.get(url, timeout=20)
@@ -108,7 +113,7 @@ def fetch_detail(session, url):
         return None
 
 
-def save_to_mongodb(results, collection="output/sina/"):
+def save_to_mongodb(results, collection="output/sina_7x24/"):
     if not results:
         return
     try:
@@ -141,7 +146,7 @@ def run(max_articles=10, output_dir=None):
         if detail:
             results.append(detail)
 
-    out_dir = output_dir or (settings.output_dir / "sina")
+    out_dir = output_dir or (settings.output_dir / "sina_7x24")
     os.makedirs(out_dir, exist_ok=True)
 
     out_path = out_dir / f"sina_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
