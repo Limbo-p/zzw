@@ -73,7 +73,7 @@ def fetch_detail(session, url):
         tree = html.fromstring(resp.text)
 
         title = ""
-        for sel in ["title", "h1", ".main-title", ".article-title"]:
+        for sel in [".main-title", "h1", ".article-title", "title"]:
             el = tree.cssselect(sel)
             if el and el[0].text_content().strip():
                 title = el[0].text_content().strip()
@@ -87,7 +87,7 @@ def fetch_detail(session, url):
                 break
 
         content = ""
-        for sel in [".article p", "#artibody p", ".content p", ".article-content p"]:
+        for sel in ["#artibody p", ".article-content p", ".main-content.w1240 p"]:
             paragraphs = tree.cssselect(sel)
             if paragraphs:
                 content = "\n".join(p.text_content().strip() for p in paragraphs if p.text_content().strip())
