@@ -384,6 +384,9 @@ def run(
     logger.info("=" * 50)
     logger.info("完成: {} 条 -> {}", len(results), out_path)
     logger.info("JSON: {} | JL: {}", json_path, jl_path)
+    # Print results to stdout as JSON lines (Crawlab result collection)
+    for art in results:
+        print(json.dumps(art, ensure_ascii=False, default=str))
     return results
 
 
