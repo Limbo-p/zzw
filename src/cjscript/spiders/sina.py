@@ -1,4 +1,4 @@
-"""新浪财经首页新闻采集爬虫模板"""
+﻿"""新浪财经首页新闻采集爬虫模板"""
 
 import json
 import os
@@ -121,7 +121,7 @@ def save_to_mongodb(results, collection="output/sina_7x24/"):
         client = MongoClient("172.19.0.2", 27017, serverSelectionTimeoutMS=3000)
         db = client["crawlab_test"]
         col = db[collection]
-        task_id = os.environ.get("CRAWLAB_TASK_ID") or (Path(__file__).resolve().parent.parent.parent.name)
+        task_id = os.environ.get("CRAWLAB_TASK_ID") or (Path(__import__("sys").argv[0]).resolve().parent.name if len(__import__("sys").argv) > 0 else None)
         if task_id:
             docs = [dict(r, task_id=task_id) for r in results]
         else:
@@ -174,3 +174,6 @@ def run(max_articles=10, output_dir=None):
 
 if __name__ == "__main__":
     run()
+
+
+

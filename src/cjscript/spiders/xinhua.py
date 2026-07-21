@@ -1,4 +1,4 @@
-"""
+﻿"""
 中证网 (cs.com.cn) 新华社记者文章爬虫
 
 策略:
@@ -314,7 +314,7 @@ def save_to_mongodb(results: list[dict], collection: str = "output/xinhua/") -> 
         client = MongoClient("172.19.0.2", 27017, serverSelectionTimeoutMS=3000)
         db = client["crawlab_test"]
         col = db[collection]
-        task_id = os.environ.get("CRAWLAB_TASK_ID") or (Path(__file__).resolve().parent.parent.parent.name)
+        task_id = os.environ.get("CRAWLAB_TASK_ID") or (Path(__import__("sys").argv[0]).resolve().parent.name if len(__import__("sys").argv) > 0 else None)
         if task_id:
             docs = [dict(r, task_id=task_id) for r in results]
             col.insert_many(docs)
@@ -414,3 +414,6 @@ if __name__ == "__main__":
         days_back=settings.cs_days_back,
         headless=settings.cs_headless,
     )
+
+
+
