@@ -60,7 +60,7 @@ def fetch_article_urls(session, max_pages=3):
             for item in items:
                 url = item.get("url", "").rstrip(".")
                 if url and "finance.sina.com.cn" in url:
-                    urls.append(url)
+                    urls.append({"url": url, "title": item.get("title", ""), "keywords": item.get("keywords", ""), "intro": item.get("intro", ""), "ctime": item.get("ctime", 0)})
             if len(items) < 15:
                 break
         except Exception as e:
@@ -146,11 +146,11 @@ def run(max_articles=10, output_dir=None):
         return []
 
     results = []
-    for i, url in enumerate(urls[:max_articles]):
-        logger.info("[{}/{}] {}", i + 1, min(max_articles, len(urls)), url[:60])
-        detail = fetch_detail(session, url)
+    for i, item in enumerate(urls[:max_articles]):
+        logger.info("[{}/{}] {}", i + 1, min(max_articles, len(urls)), item["url"][:60])
+        detail = fetch_detail(session, item["url"])
         if detail:
-            results.append(detail)
+            detail["keywords"] = item.get("keywords", "").split("\uFF0C") if item.get("keywords") else []\n            detail["summary"] = item.get("intro", "")\n            detail["ctime"] = item.get("ctime", 0)\n            results.append(detail)
 
     out_dir = output_dir or (settings.output_dir / "sina_7x24")
     os.makedirs(out_dir, exist_ok=True)
@@ -175,6 +175,8 @@ def run(max_articles=10, output_dir=None):
 
 if __name__ == "__main__":
     run()
+
+
 
 
 
