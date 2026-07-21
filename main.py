@@ -1,26 +1,39 @@
 """
-cjscript - Crawlab 主入口
+cjscript - Crawlab main entry
 
-用法:
-  python main.py <爬虫名>
-
-示例:
+Usage:
   python main.py xinhua
 """
 
 import sys
-import runpy
+from pathlib import Path
+
+# Add src/ to Python path so cjscript package can be imported
+_src = Path(__file__).resolve().parent / "src"
+if str(_src) not in sys.path:
+    sys.path.insert(0, str(_src))
 
 
-if __name__ == "__main__":
+def main():
     name = sys.argv[1] if len(sys.argv) > 1 else ""
     if not name:
-        print("用法: python main.py <爬虫名>")
-        print("可用爬虫: xinhua")
+        print("Usage: python main.py <spider>")
+        print("Available: xinhua")
         sys.exit(1)
 
     if name == "xinhua":
-        runpy.run_module("cjscript.spiders.xinhua", run_name="__main__")
+        from cjscript.spiders.xinhua import run
+        from cjscript.config.settings import settings
+        run(
+            keyword=settings.cs_search_kw,
+            max_pages=settings.cs_max_pages,
+            days_back=settings.cs_days_back,
+            headless=settings.cs_headless,
+        )
     else:
-        print(f"未知爬虫: {name}")
+        print(f"Unknown spider: {name}")
         sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
