@@ -303,24 +303,20 @@ def is_recent(article: dict, days: int) -> bool:
         return True
 
 
-# ===== MongoDB 结果存储 =====
+# ===== 主流程 =====
 
-def save_to_mongodb(results: list[dict]) -> None:
-    """将结果写入 Crawlab 的 MongoDB 结果集。"""
+
+def save_to_mongodb(results: list[dict], collection: str = "output/xinhua/") -> None:
     if not results:
         return
     try:
         from pymongo import MongoClient
         client = MongoClient("172.19.0.2", 27017, serverSelectionTimeoutMS=3000)
         db = client["crawlab_test"]
-        col = db["output/xinhua/"]
-        col.insert_many(results)
-        logger.info("MongoDB: {} 条结果已写入 crawlab_test.output/xinhua/", len(results))
+        col = db[collection]
+        logger.info("MongoDB: {} results saved to crawlab_test.{}", len(results), collection)
     except Exception as e:
-        logger.warning("MongoDB 写入失败（不影响文件保存）: {}", e)
-
-
-# ===== 主流程 =====
+        logger.warning("MongoDB save failed (file output unaffected): {}", e)
 
 def run(
     keyword: str = "新华社记者",
@@ -401,10 +397,6 @@ def run(
     logger.info("=" * 50)
     logger.info("完成: {} 条 -> {}", len(results), out_path)
     logger.info("JSON: {} | JL: {}", json_path, jl_path)
-    # Print results to stdout as JSON lines (Crawlab result collection)
-    for art in results:
-        print(json.dumps(art, ensure_ascii=False, default=str))
-    # Save to Crawlab MongoDB result collection
     save_to_mongodb(results)
     return results
 
