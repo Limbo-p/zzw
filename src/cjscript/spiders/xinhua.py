@@ -314,7 +314,7 @@ def save_to_mongodb(results: list[dict], collection: str = "output/xinhua/") -> 
         client = MongoClient("172.19.0.2", 27017, serverSelectionTimeoutMS=3000)
         db = client["crawlab_test"]
         col = db[collection]
-        task_id = os.environ.get("CRAWLAB_TASK_ID") or os.getcwd().split("/")[-1] if os.getcwd().split("/")[-1].startswith("6a") else None
+        task_id = os.environ.get("CRAWLAB_TASK_ID") or (Path(__file__).resolve().parent.parent.parent.name)
         if task_id:
             docs = [dict(r, task_id=task_id) for r in results]
             col.insert_many(docs)
